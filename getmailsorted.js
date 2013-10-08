@@ -14,8 +14,8 @@ function() {
 	
 	this.MainFolderName=this.getMessage("TestFoldName");
 	this.MainFolderId;
-	this._getAllemlINfo();
-	this.getAllFolderId();
+	//this._getAllemlINfo();
+	//this.getAllFolderId();
 	
 };
 sort_email_HandlerObject.prototype.doubleClicked =
@@ -43,6 +43,7 @@ function() {
 	Dwt.setHandler(document.getElementById("Createfolder"), DwtEvent.ONCLICK, AjxCallback.simpleClosure(this.createSortFolder, this));
 	Dwt.setHandler(document.getElementById("MoveMsg"), DwtEvent.ONCLICK, AjxCallback.simpleClosure(this._MoveMessage, this));
 	Dwt.setHandler(document.getElementById("getInfo"), DwtEvent.ONCLICK, AjxCallback.simpleClosure(this.getAllFolderId, this));
+	Dwt.setHandler(document.getElementById("AddressFolder"), DwtEvent.ONCLICK, AjxCallback.simpleClosure(this.getAllAddr, this));
 	
 	this.preferenceDialog = new ZmDialog( { title:"Sort Emails", view:preferenceView, parent:this.getShell(), standardButtons:[DwtDialog.OK_BUTTON] } );
 	this.preferenceDialog.setButtonListener(DwtDialog.OK_BUTTON, new AjxListener(this, this._okBtnListener));
@@ -59,6 +60,7 @@ function() {
 	html[i++] = "<td><input id='Createfolder'  type='button' value='Create Folder'/></td>";
 	html[i++] = "<td><input id='MoveMsg'  type='button' value='Move'/></td>";
 	html[i++] = "<td><input id='getInfo'  type='button' value='getInfo'/></td>";
+	html[i++] = "<td><input id ='AddressFolder' type='button' value='addefolder'/></td>";
 	html[i++] = "</tr>";
 	html[i++] = "</table>";
 
@@ -77,6 +79,25 @@ sort_email_HandlerObject.prototype.resetView = function() {
 	} catch(e) {
 	}
 };
+
+//get all email address
+sort_email_HandlerObject.prototype.getAllAddr = function(){
+	var msgArray = appCtxt.getCurrentController().getList().getArray();
+	var address;
+	for(var i = 0 ; i < msgArray.length ; i ++){
+		address = msgArray[i].participants._array[0].name;
+		if(address=="")
+			address="admin";
+		var emailAddrInfo = this.dateList.getAddress(address);
+		if (!emailAddrInfo) {
+			emailAddrInfo = new AddressInfo(address);
+			this.dateList.addAddr(emailAddrInfo);
+			console.log(address);
+			this.MainFolderId=this.CreateNewFolder(appCtxt.getFolderTree().root.id,address);
+		}		
+	}
+	console.log(this.dateList);
+}
 
 //move all message
 sort_email_HandlerObject.prototype._MoveMessage = function (){
@@ -118,7 +139,7 @@ sort_email_HandlerObject.prototype.getAllFolderId=function(){
 	if(this._checkFolder(this.MainFolderName,appCtxt.getFolderTree().root.id))
 		this.createSortFolder();
 	this._getAllFolderId(this.MainFolderName);
-	console.log(this.dateList);
+	//console.log(this.dateList);
 }
 
 //create new folder
@@ -155,7 +176,7 @@ sort_email_HandlerObject.prototype._checkFolder=function(Fldrname,ParentId){
 	var params = {soapDoc: soapDoc , asyncMode: false , callback: null , errorCallback: null};
     var response = appCtxt.getAppController().sendRequest(params);
 	var Mainfolders = response.GetFolderResponse.folder[0].folder;
-	console.log(Mainfolders);
+	//console.log(Mainfolders);
 	for(var i = 0 ; i < Mainfolders.length ; i++ ){
 		if( Mainfolders[i].name == Fldrname){
 			isFolderCreate=true;
@@ -197,7 +218,7 @@ sort_email_HandlerObject.prototype.CreateNewFolder=function(_parent,_fldrName){
 	return(response.CreateFolderResponse.folder[0].id);
 }
 
-/**************************************************/
+/***DateInfo**/
 function DateInfo(year){
 	this._id=0;
 	this._year = year;
@@ -207,6 +228,7 @@ function DateInfo(year){
 					  ,false,false,false
 					  ,false,false,false,false];			  
 }
+//function of DataInfo 
 DateInfo.prototype.getYear = function() {
 	return this._year;
 };
@@ -219,10 +241,33 @@ DateInfo.prototype.set_Id = function( n ){
 DateInfo.prototype.setMonth_Id = function( month ,n){
 	this.monthId[month] = n ;
 };
-//datePrefs
+
+/***AddressInfo**/
+function AddressInfo(a){
+	this.address = a;
+	this.fldID;
+}
+//function of AddrerssInfo
+AddressInfo.prototype.getAddr = function(){
+	return this.address;
+}
+/***datePrefs**/
 function DatePrefs() {
 	this.dateArray = [];
+	this.addressArray = [];
 }
+//dataPrefs's function for addressArray 
+DatePrefs.prototype.getAddress = function ( addr ) {
+    if (this.addressArray.hasOwnProperty(addr)) {
+        return this.addressArray[addr];
+    }
+};
+DatePrefs.prototype.addAddr = function ( AddressInfo ) {
+	this.addressArray[AddressInfo.getAddr()] = AddressInfo;
+};
+
+
+//dataPrefs's function for dataArray
 DatePrefs.prototype.add = function( DateInfo ) {
 	this.dateArray["year_"+DateInfo.getYear()] = DateInfo;
 };
