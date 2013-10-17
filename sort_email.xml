@@ -1,6 +1,7 @@
 <zimlet name="sort_email" version="1.0" description="Let your fucking emails sorted">
 	<include>getmailsorted.js</include>
+	<includeCSS>maincss.css</includeCSS>
 	<handlerObject>sort_email_HandlerObject</handlerObject>
-	<zimletPanelItem label="SortByDate">
+	<zimletPanelItem label="SortMail" icon="sortemails-panelIcon">
 	</zimletPanelItem>
 </zimlet>

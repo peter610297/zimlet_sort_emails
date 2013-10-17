@@ -1,0 +1,18 @@
+.Imgsortemails-panelIcon {
+  background: url("powersort.gif") no-repeat 0 0;
+  width: 16px;
+  height: 16px;
+  overflow: hidden;}
+div.banner{
+	background:GRAY; 
+	color:WHITE;
+	height:25px;
+	font-size:15px; 
+	text-align:center;}
+div.vanish{
+	background:RED;
+	height:25px;
+	color:WHITE;
+	font-size:10px;
+	text-align:center;
+	line-height:25px;}
