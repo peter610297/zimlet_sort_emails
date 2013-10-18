@@ -11,11 +11,11 @@ sort_email_HandlerObject.prototype.init =
 function() {
 
 	this.dateList = new MailPrefs();
-	
-	this.MainFolderName=this.getMessage("TestFoldName");
+	this.YMFolderName=this.getMessage("FolderName_YearMonth");
+	this.MFolderName=this.getMessage("FolderName_Month");
+	this.AFolderName=this.getMessage("FolderName_Address");
 	this.MainFolderId;
-	this._getAllemlINfo();
-	//this.getAllFolderId();
+	this.currentFolder;
 	
 };
 sort_email_HandlerObject.prototype.doubleClicked =
@@ -24,6 +24,7 @@ function() {
 };
 sort_email_HandlerObject.prototype.singleClicked =
 function() {	
+	this._getAllemlINfo();
 	this._displayDialog();
 };
 
@@ -34,17 +35,18 @@ function() {
 		this.preferenceDialog.popup(); 
 		return;
 	}
-		
+	
 	var preferenceView = new DwtComposite(this.getShell()); 
 	preferenceView.setSize("300", "135");
 	preferenceView.getHtmlElement().style.overflow = "auto"; 
 	preferenceView.getHtmlElement().innerHTML = this.createDialogpreferenceView(); 
 	
-	Dwt.setHandler(document.getElementById("CreateYearfolder"), DwtEvent.ONCLICK, AjxCallback.simpleClosure(this.createYearFolder, this));
-	Dwt.setHandler(document.getElementById("CreateMonthfolder"), DwtEvent.ONCLICK, AjxCallback.simpleClosure(this.createMonthFolder, this));
+	//Dwt.setHandler(document.getElementById("CreateYearfolder"), DwtEvent.ONCLICK, AjxCallback.simpleClosure(this.createYearFolder, this));
+	//Dwt.setHandler(document.getElementById("CreateMonthfolder"), DwtEvent.ONCLICK, AjxCallback.simpleClosure(this.createMonthFolder, this));
+	//Dwt.setHandler(document.getElementById("AddressFolder"), DwtEvent.ONCLICK, AjxCallback.simpleClosure(this.createAddrFolder, this));
 	Dwt.setHandler(document.getElementById("MoveMsg"), DwtEvent.ONCLICK, AjxCallback.simpleClosure(this._MoveMessage, this));
 	Dwt.setHandler(document.getElementById("getInfo"), DwtEvent.ONCLICK, AjxCallback.simpleClosure(this.getAllFolderId, this));
-	Dwt.setHandler(document.getElementById("AddressFolder"), DwtEvent.ONCLICK, AjxCallback.simpleClosure(this.createAddrFolder, this));
+	
 	
     var createButtonId = Dwt.getNextId();
 	var createButton = new DwtDialog_ButtonDescriptor(createButtonId, ("Create"), DwtDialog.ALIGN_RIGHT);
@@ -67,9 +69,9 @@ function() {
 	html[i++] = "<table><tr>";
 //	html[i++] = "<td><input id='CreateYearfolder'   type='button' value='Year Folder'/></td>";
 //	html[i++] = "<td><input id='CreateMonthfolder'  type='button' value='month Folder'/></td>";
+//	html[i++] = "<td><input id ='AddressFolder' type='button' value='addefolder'/></td>";
 	html[i++] = "<td><input id='MoveMsg'  type='button' value='Move'/></td>";
 	html[i++] = "<td><input id='getInfo'  type='button' value='getInfo'/></td>";
-//	html[i++] = "<td><input id ='AddressFolder' type='button' value='addefolder'/></td>";
 	html[i++] = "</tr></table>";
 	return html.join("");
 };
@@ -81,7 +83,6 @@ sort_email_HandlerObject.prototype.createBtnListener = function() {
 	var checkbox3 = document.getElementById("r3");
 	var noticediv = document.getElementById("notice");
 	var noticefrontdiv = document.getElementById("notice_front");
-	
 	if(checkbox1.checked){
 		this.createYearFolder();
 		this.preferenceDialog.popdown();
@@ -146,15 +147,23 @@ sort_email_HandlerObject.prototype._getAllemlINfo = function (){
 
 //getAllfolder
 sort_email_HandlerObject.prototype.getAllFolderId=function(){
-	if(this._checkFolder(this.MainFolderName,appCtxt.getFolderTree().root.id))
+	var msgArray = appCtxt.getCurrentController().getList().getArray();
+	//console.log(msgArray);
+	/*
+	if(this._checkFolder(this.YMFolderName,appCtxt.getFolderTree().root.id))
 		this.createYearFolder();
-	this._getAllFolderId(this.MainFolderName);
+	*/
+	this._getAllFolderId(this.AFolderName);
+	
 	//console.log(this.dateList);
 }
-
+/********************************************************
+* function for creating folder                          * 
+* [month]/[year/month]/address name                     *
+*********************************************************/
 //create folder(address)
 sort_email_HandlerObject.prototype.createAddrFolder = function(){
-	this.MainFolderId=this.CreateNewFolder(appCtxt.getFolderTree().root.id,this.MainFolderName);
+	this.MainFolderId=this.CreateNewFolder(appCtxt.getFolderTree().root.id,this.AFolderName);
 	var msgArray = appCtxt.getCurrentController().getList().getArray();
 	var address;
 	for(var i = 0 ; i < msgArray.length ; i ++){
@@ -172,23 +181,14 @@ sort_email_HandlerObject.prototype.createAddrFolder = function(){
 }
 //create folder(month)
 sort_email_HandlerObject.prototype.createMonthFolder=function(){
-	this.MainFolderId=this.CreateNewFolder(appCtxt.getFolderTree().root.id,this.MainFolderName);
-	this.CreateNewFolder(this.MainFolderId,"Jan");
-	this.CreateNewFolder(this.MainFolderId,"Feb");
-	this.CreateNewFolder(this.MainFolderId,"Mar");
-	this.CreateNewFolder(this.MainFolderId,"Apr");
-	this.CreateNewFolder(this.MainFolderId,"May");
-	this.CreateNewFolder(this.MainFolderId,"Jun");
-	this.CreateNewFolder(this.MainFolderId,"Jul");
-	this.CreateNewFolder(this.MainFolderId,"Aug");
-	this.CreateNewFolder(this.MainFolderId,"Sep");
-	this.CreateNewFolder(this.MainFolderId,"Oct");
-	this.CreateNewFolder(this.MainFolderId,"Nov");
-	this.CreateNewFolder(this.MainFolderId,"Dec");
+	this.MainFolderId=this.CreateNewFolder(appCtxt.getFolderTree().root.id,this.MFolderName);
+	for(var i=1;i<=12;i++){
+		this.CreateNewFolder(this.MainFolderId,i);
+	}
 }
 //create folder(year/month)
 sort_email_HandlerObject.prototype.createYearFolder=function(){
-	this.MainFolderId=this.CreateNewFolder(appCtxt.getFolderTree().root.id,this.MainFolderName);
+	this.MainFolderId=this.CreateNewFolder(appCtxt.getFolderTree().root.id,this.YMFolderName);
 	var YearID;
 	var date = new Date();
 	
@@ -204,10 +204,10 @@ sort_email_HandlerObject.prototype.createYearFolder=function(){
 	}
 }
 
-/**
-* creating folder 
-* soap request and response
-*/
+/********************************************************
+* soap request and response                             *
+* creating folder / get mail info                       * 
+*********************************************************/
 //get folder request and response to check folder 
 sort_email_HandlerObject.prototype._checkFolder=function(Fldrname,ParentId){
 	var isFolderCreate = false;
@@ -234,16 +234,23 @@ sort_email_HandlerObject.prototype._getAllFolderId=function(Fldrname){
 		if( flrTree[i].name == Fldrname)
 			mainFloder = flrTree[i].children._array;
 	}
-	for(var i = 0 ; i < mainFloder.length ; i++){
-		this.dateList.setYearId(mainFloder[i].name,mainFloder[i].id);
-		//console.log(mainFloder[i].name,mainFloder[i].id);
-		for(var j = 0 ; j < mainFloder[i].children._array.length ; j++){
-			this.dateList.setMonthId(mainFloder[i].name,
-									 mainFloder[i].children._array[j].name,
-									 mainFloder[i].children._array[j].id
-									);
+	if(Fldrname=="[Year&Month]"){
+		for(var i = 0 ; i < mainFloder.length ; i++){
+			this.dateList.setYearId(mainFloder[i].name,mainFloder[i].id);
+			for(var j = 0 ; j < mainFloder[i].children._array.length ; j++){
+				this.dateList.setMonthId(mainFloder[i].name,
+										 mainFloder[i].children._array[j].name,
+										 mainFloder[i].children._array[j].id
+										);
+			}
 		}
 	}
+	else if(Fldrname==this.AFolderName){
+		for( var i =0 ; i < mainFloder.length ; i++){
+			this.dateList.setAddrId(mainFloder[i].name,mainFloder[i].id);
+		}
+	}
+	console.log(this.dateList);
 }
 
 //create folder request and response then return folder ID
@@ -258,8 +265,11 @@ sort_email_HandlerObject.prototype.CreateNewFolder=function(_parent,_fldrName){
     var response=appCtxt.getAppController().sendRequest(params);
 	return(response.CreateFolderResponse.folder[0].id);
 }
-
-/*********************DateInfo*********************/
+/********************************************************
+* Date type                                             * 
+* DataInfo/AddressInfo/MailPrefs                        *
+*********************************************************/
+///////////DateInfo///////////
 function DateInfo(year){
 	this._id=0;
 	this._year = year;
@@ -283,16 +293,19 @@ DateInfo.prototype.setMonth_Id = function( month ,n){
 	this.monthId[month] = n ;
 };
 
-/*********************AddressInfo*********************/
+///////////AddressInfo///////////
 function AddressInfo(a){
-	this.address = a;
-	this.fldID;
+	this.name = a;
+	this.fldID = 0;
 }
 //function of AddrerssInfo
 AddressInfo.prototype.getAddr = function(){
-	return this.address;
+	return this.name;
 }
-/*********************MailPrefs*********************/
+AddressInfo.prototype.setAddr_id = function( i ){
+	this.fldID = i;
+}
+///////////MailPrefs///////////
 function MailPrefs() {
 	this.dateArray = [];
 	this.addressArray = [];
@@ -306,7 +319,9 @@ MailPrefs.prototype.getAddress = function ( addr ) {
 MailPrefs.prototype.addAddr = function ( AddressInfo ) {
 	this.addressArray[AddressInfo.getAddr()] = AddressInfo;
 };
-
+MailPrefs.prototype.setAddrId = function (n,id){
+	this.addressArray[n].setAddr_id(id);
+}
 
 //MailPrefs's function for dataArray
 MailPrefs.prototype.add = function( DateInfo ) {
