@@ -2,6 +2,6 @@
 	<include>getmailsorted.js</include>
 	<includeCSS>maincss.css</includeCSS>
 	<handlerObject>sort_email_HandlerObject</handlerObject>
-	<zimletPanelItem label="SortMail" icon="sortemails-panelIcon">
+	<zimletPanelItem label="PowerSort" icon="sortemails-panelIcon">
 	</zimletPanelItem>
 </zimlet>
