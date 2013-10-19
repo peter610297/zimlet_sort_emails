@@ -10,6 +10,11 @@ sort_email_HandlerObject.prototype.constructor = sort_email_HandlerObject;
 sort_email_HandlerObject.prototype.init =
 function() {
 
+	//initial DEFAULT_date
+	var CurDate = new Date();	
+	this.DEFAULT_YEAR=CurDate.getFullYear();
+	this.DEFAULT_MONTH=CurDate.getMonth()+1;	
+	
 	this.dateList = new MailPrefs();
 	this.YMFolderName=this.getMessage("FolderName_YearMonth");
 	this.MFolderName=this.getMessage("FolderName_Month");
@@ -24,35 +29,46 @@ function() {
 };
 sort_email_HandlerObject.prototype.singleClicked =
 function() {	
+
 	this.getAllemlINfo();
 	this._displayDialog();
+	
+	//initial progress bar 
+	var probar = document.getElementById("probar");
+	probar.style.width = '0%'; 
 };
 
+//reset view
+sort_email_HandlerObject.prototype.resetView = function() {
+	try {
+		q="in:inbox";
+		appCtxt.getSearchController().search({query:q});
+	} catch(e) {
+	}
+};
 
-sort_email_HandlerObject.prototype._displayDialog = 
-function() {
+sort_email_HandlerObject.prototype._displayDialog = function() {
 	if (this.preferenceDialog) {
 		this.preferenceDialog.popup(); 
 		return;
 	}
 	
 	var preferenceView = new DwtComposite(this.getShell()); 
-	preferenceView.setSize("300", "135");
+	preferenceView.setSize("300", "280");
 	preferenceView.getHtmlElement().style.overflow = "auto"; 
 	preferenceView.getHtmlElement().innerHTML = this.createDialogpreferenceView(); 
 	
-	//Dwt.setHandler(document.getElementById("CreateYearfolder"), DwtEvent.ONCLICK, AjxCallback.simpleClosure(this.createYearFolder, this));
-	//Dwt.setHandler(document.getElementById("CreateMonthfolder"), DwtEvent.ONCLICK, AjxCallback.simpleClosure(this.createMonthFolder, this));
-	//Dwt.setHandler(document.getElementById("AddressFolder"), DwtEvent.ONCLICK, AjxCallback.simpleClosure(this.createAddrFolder, this));
-	//Dwt.setHandler(document.getElementById("getEmailInfo"), DwtEvent.ONCLICK, AjxCallback.simpleClosure(this.getAllFolderId, this));
+
 	Dwt.setHandler(document.getElementById("MoveMsg"), DwtEvent.ONCLICK, AjxCallback.simpleClosure(this._MoveMessage, this));
+	Dwt.setHandler(document.getElementById("Create"), DwtEvent.ONCLICK, AjxCallback.simpleClosure(this.createBtnListener, this));
 	
-	
+    /*
     var createButtonId = Dwt.getNextId();
 	var createButton = new DwtDialog_ButtonDescriptor(createButtonId, ("Create"), DwtDialog.ALIGN_RIGHT);
 	this.preferenceDialog = new ZmDialog( { title:"Sort Emails", view:preferenceView, parent:this.getShell(), standardButtons:[DwtDialog.CANCEL_BUTTON], extraButtons:[createButton]} );
 	this.preferenceDialog.setButtonListener(createButtonId, new AjxListener(this, this.createBtnListener));
-	
+	*/
+	this.preferenceDialog = new ZmDialog( { title:"Sort Emails", view:preferenceView, parent:this.getShell(), standardButtons:[DwtDialog.CANCEL_BUTTON]} );
 	this.preferenceDialog.popup();
 };
 
@@ -66,13 +82,27 @@ function() {
 	html[i++] = "<input id='r3' type='radio' name='SelectGroup'/><label for='r3'>Sender Name</label><br/>";
 	html[i++] = "<div id='notice_front' style='background:GRAY;height:25px;'></div>";
 	html[i++] = "<div id='notice' class='vanish' style='display:none;'>PlEASE SELECT ONE SORTING TYPE!</div>";
+	
+	
+	html[i++] = "<div class='input-group input-group-sm'>";
+	html[i++] = "<input type='text' class='form-control' placeholder='Year Limit  DEFAULT["+this.DEFAULT_YEAR +"]' id='yearLimit'>";
+	html[i++] = "<input type='text' class='form-control' placeholder='Month Limit  DEFAULT["+this.DEFAULT_MONTH +"]' id='monthLimit'></div>";
+	
+	html[i++] = "<span class='input-group-btn'>";
+    html[i++] = "<button class='btn btn-default btn-sm' type='button' id='MoveMsg'>Move</button>";
+	html[i++] = "<button class='btn btn-default btn-sm' type='button' id='Create'>Create</button>";
+    html[i++] = "</span>";
+/*	  
 	html[i++] = "<table><tr>";
-//	html[i++] = "<td><input id='CreateYearfolder'   type='button' value='Year Folder'/></td>";
-//	html[i++] = "<td><input id='CreateMonthfolder'  type='button' value='month Folder'/></td>";
-//	html[i++] = "<td><input id ='AddressFolder' type='button' value='addefolder'/></td>";
-	html[i++] = "<td><input id='MoveMsg'  type='button' value='Move'/></td>";
 //	html[i++] = "<td><input id='getEmailInfo'  type='button' value='getEmailInfo'/></td>";
+	html[i++] = "<td><button id='MoveMsg'  type='button' value='Move'/>MOVE</button></td>";
+	html[i++] = "<td width=40%><input id='cEmail_emailField' type=\"text\" style=\"width:100%;\" type='text'></input></td>";
 	html[i++] = "</tr></table>";
+*/
+	//progress bar 
+	html[i++] ="<div class='progress'>";
+    html[i++] ="<div id='probar' class='progress-bar progress-bar-info' role='progressbar' aria-valuenow='20' aria-valuemin='0' aria-valuemax='100' style='width: 0%'>";
+    html[i++] = '</div></div>';
 	return html.join("");
 };
 
@@ -97,24 +127,51 @@ sort_email_HandlerObject.prototype.createBtnListener = function() {
 		noticediv.style.display="";
 	}
 };
-
-//reset view
-sort_email_HandlerObject.prototype.resetView = function() {
-	try {
-		q="in:inbox";
-		appCtxt.getSearchController().search({query:q});
-	} catch(e) {
-	}
-};
+//progressbar Rate
+sort_email_HandlerObject.prototype.progressbarRate = function (n){
+	var probar = document.getElementById("probar");
+	if(n.toFixed()>=0 && n.toFixed()<10)
+		probar.style.width = '5%'; 
+	else if(n.toFixed()>=10 && n.toFixed()<20)
+		probar.style.width = '15%'; 
+	else if(n.toFixed()>=20 && n.toFixed()<30)
+		probar.style.width = '25%'; 
+	else if(n.toFixed()>=30 && n.toFixed()<40)
+		probar.style.width = '35%'; 
+	else if(n.toFixed()>=40 && n.toFixed()<50)
+		probar.style.width = '45%'; 
+	else if(n.toFixed()>=50 && n.toFixed()<60)
+		probar.style.width = '55%'; 
+	else if(n.toFixed()>=60 && n.toFixed()<70)
+		probar.style.width = '65%'; 
+	else if(n.toFixed()>=70 && n.toFixed()<80)
+		probar.style.width = '75%'; 
+	else if(n.toFixed()>=80 && n.toFixed()<90)
+		probar.style.width = '85%'; 
+	else if(n.toFixed()>=90 && n.toFixed()<100)
+		probar.style.width = '100%'; 
+}
 
 //move all message
 sort_email_HandlerObject.prototype._MoveMessage = function (){
+
 	var q = appCtxt.getSearchController().currentSearch.query;
 	var msgArray = appCtxt.getCurrentController().getList().getArray();
 	var address;
+	
+	var CurDate = new Date();	
+	var ylimit = document.getElementById("yearLimit").value;
+	var mlimit = document.getElementById("monthLimit").value;
+	if(mlimit=="")
+		mlimit=this.DEFAULT_MONTH;
+	if(ylimit=="")
+		ylimit=this.DEFAULT_YEAR;
+
 	this.currentFolder=this._checkFolder(appCtxt.getFolderTree().root.id);
+	
 	if(this.currentFolder==null)
 		appCtxt.setStatusMsg("Please click [create] button");
+		
 	else{
 		this.getAllFolderId(this.currentFolder);
 		if(q!="in:inbox"){
@@ -122,24 +179,33 @@ sort_email_HandlerObject.prototype._MoveMessage = function (){
 			appCtxt.setStatusMsg("Please click [move] button again");
 		}
 		else{
+		
+			//for moving mail to year/month folder
 			if(this.currentFolder==this.YMFolderName){
 				for(var i = 0 ; i < msgArray.length ; i ++){
 					var EmlDate = new Date(msgArray[i].date);	
 					msgArray[i].move(this.dateList.getMonthId(EmlDate.getFullYear(),EmlDate.getMonth()+1),null,this._handlErrorResponse);
+					this.progressbarRate(i/msgArray.length*100);
 				}
 			}
+			
+			//for moving mail to sender name folder
 			else if(this.currentFolder==this.AFolderName){
 				for(var i = 0 ; i < msgArray.length ; i ++){
 					address = msgArray[i].participants._array[0].name;
 					if(address=="")
 						address="admin";
 					msgArray[i].move(this.dateList.getAddrId(address),null,this._handlErrorResponse);
+					this.progressbarRate(i/msgArray.length*100);
 				}
 			}
+			
+			//for moving mail to month folder
 			else if(this.currentFolder==this.MFolderName){
 				for(var i = 0 ; i < msgArray.length ; i ++){
 					var EmlDate = new Date(msgArray[i].date);	
 					msgArray[i].move(this.dateList.getonlyMonthId(EmlDate.getMonth()+1),null,this._handlErrorResponse);
+					this.progressbarRate(i/msgArray.length*100);
 				}
 			}
 		}
@@ -147,6 +213,7 @@ sort_email_HandlerObject.prototype._MoveMessage = function (){
 		this.resetView();
 	}
 }
+
 //get all message information
 sort_email_HandlerObject.prototype.getAllemlINfo = function (){
 	var msgArray = appCtxt.getCurrentController().getList().getArray();
@@ -300,9 +367,9 @@ sort_email_HandlerObject.prototype.CreateNewFolder=function(_parent,_fldrName){
 * DataInfo/AddressInfo/MailPrefs                        *
 *********************************************************/
 
-/***************************** 
-///////////DateInfo///////////
-******************************/
+/****************************** 
+///////////DateInfo///////////*
+*******************************/
 function DateInfo(year){
 	this._id=0;
 	this._year = year;
@@ -326,9 +393,9 @@ DateInfo.prototype.setMonth_Id = function( month ,n){
 	this.monthId[month] = n ;
 };
 
-/****************************** 
-///////////AddressInfo/////////
-******************************/
+/******************************* 
+///////////AddressInfo/////////*
+********************************/
 function AddressInfo(a){
 	this.name = a;
 	this.fldID = 0;
@@ -344,9 +411,9 @@ AddressInfo.prototype.getAddr_id = function(){
 	return this.fldID;
 }
 
-/****************************** 
-///////////MailPrefs///////////
-******************************/
+/******************************* 
+///////////MailPrefs///////////*
+********************************/
 function MailPrefs() {
 	this.dateArray = [];
 	this.addressArray = [];
