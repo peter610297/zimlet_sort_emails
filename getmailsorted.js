@@ -76,12 +76,12 @@ sort_email_HandlerObject.prototype.createDialogpreferenceView =
 function() {
 	var html = new Array();
 	var i = 0;
-	html[i++] = "<div class='banner'>Choose One Sorting Type</div>";
+	html[i++] = "<div class='banner'>Choose One Category Type</div>";
 	html[i++] = "<input id='r1' type='radio' name='SelectGroup'/><label for='r1'>Year/Month</label><br/>";
 	html[i++] = "<input id='r2' type='radio' name='SelectGroup'/><label for='r2'>Only Month</label><br/>";
 	html[i++] = "<input id='r3' type='radio' name='SelectGroup'/><label for='r3'>Sender Name</label><br/>";
 	html[i++] = "<div id='notice_front' style='background:GRAY;height:25px;'></div>";
-	html[i++] = "<div id='notice' class='vanish' style='display:none;'>PlEASE SELECT ONE SORTING TYPE!</div>";
+	html[i++] = "<div id='notice' class='vanish' style='display:none;'>PlEASE SELECT ONE CARWGORY TYPE!</div>";
 	
 	
 	html[i++] = "<div class='input-group input-group-sm'>";
@@ -100,8 +100,8 @@ function() {
 	html[i++] = "</tr></table>";
 */
 	//progress bar 
-	html[i++] ="<div class='progress'>";
-    html[i++] ="<div id='probar' class='progress-bar progress-bar-info' role='progressbar' aria-valuenow='20' aria-valuemin='0' aria-valuemax='100' style='width: 0%'>";
+	html[i++] ="<div class='progress progress-striped active'>";
+    html[i++] ="<div id='probar' class='progress-bar' role='progressbar' aria-valuenow='45' aria-valuemin='0' aria-valuemax='100' style='width: 0%'>";
     html[i++] = '</div></div>';
 	return html.join("");
 };
