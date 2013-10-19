@@ -54,7 +54,7 @@ sort_email_HandlerObject.prototype._displayDialog = function() {
 	}
 	
 	var preferenceView = new DwtComposite(this.getShell()); 
-	preferenceView.setSize("300", "280");
+	preferenceView.setSize("300", "265");
 	preferenceView.getHtmlElement().style.overflow = "auto"; 
 	preferenceView.getHtmlElement().innerHTML = this.createDialogpreferenceView(); 
 	
