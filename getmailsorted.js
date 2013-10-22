@@ -22,6 +22,12 @@ function() {
 	this.MainFolderId;
 	this.currentFolder;
 	
+	//set for onlymonthArray
+	for(var i = 0 ; i<=12 ; i++){
+		var onlyInfo = new OnlyMonInfo(i);
+		this.dateList.initMonth(onlyInfo);
+	}
+	
 };
 sort_email_HandlerObject.prototype.doubleClicked =
 function() {	
@@ -207,12 +213,11 @@ sort_email_HandlerObject.prototype._MoveMessage = function (){
 			}
 			
 			//for moving mail to month folder
-			
-			else if(this.currentFolder==this.MFolderName){
-				for(var i = 0 ; i < msgArray.length ; i ++){
-					var EmlDate = new Date(msgArray[i].date);
-					msgArray[i].move(this.dateList.getonlyMonthId(EmlDate.getMonth()+1),null,this._handlErrorResponse);
-					this.progressbarRate(i/msgArray.length*100);
+			else if(this.currentFolder==this.MFolderName){				
+				for(var i = 1 ; i < this.dateList.onlyMonthArray.length ; i ++){
+					if(this.dateList.getOlyemlId(i).length == 0 ){}
+					else
+						this.moveEml( this.dateList.getonlyMonthFdrId(i) , this.dateList.getOlyemlId(i));
 				}
 			}
 			
@@ -239,19 +244,21 @@ sort_email_HandlerObject.prototype.getAllemlINfo = function (){
 		}		
 		this.dateList.setEmailMon(eml_year,eml_mon);
 		
+		//get information for only month
+		this.dateList.addOlyemlId(eml_mon,msgArray[i].msgIds[0]);	
 		
-		//get information for address
-		var address = msgArray[i].participants._array[0].name;
-		if(address=="")
-			address="admin";
-		var emailAddrInfo = this.dateList.getAddress(address);
+		//get information for senderName
+		var senderName = msgArray[i].participants._array[0].name;
+		if(senderName=="")
+			senderName="admin";
+		var emailAddrInfo = this.dateList.getAddress(senderName);
 		if (!emailAddrInfo) {
-			emailAddrInfo = new AddressInfo(address);
+			emailAddrInfo = new AddressInfo(senderName);
 			this.dateList.addAddr(emailAddrInfo);
 		}	
-		this.dateList.AddemlId(address,msgArray[i].msgIds[0]);
+		this.dateList.AddemlId(senderName,msgArray[i].msgIds[0]);	
 	}
-	console.log(this.dateList);
+
 }
 
 //getAllfolder
@@ -368,7 +375,7 @@ sort_email_HandlerObject.prototype._getAllFolderId=function(Fldrname){
 	}
 	else if(Fldrname==this.MFolderName){
 		for( var i =0 ; i < mainFloder.length ; i++){
-			this.dateList.setonlyMonthId(i+1,mainFloder[i].id);
+			this.dateList.setonlyMonthFdrId(i+1,mainFloder[i].id);
 		}
 	}
 	else if(Fldrname==this.AFolderName){
@@ -392,7 +399,7 @@ sort_email_HandlerObject.prototype.CreateNewFolder=function(_parent,_fldrName){
 }
 /********************************************************
 * Date type                                             * 
-* DataInfo/AddressInfo/MailPrefs                        *
+* DataInfo/AddressInfo/OnlymonInfo/MailPrefs            *
 *********************************************************/
 
 /******************************* 
@@ -446,6 +453,29 @@ AddressInfo.prototype.addmailid = function(i){
 AddressInfo.prototype.getmailid = function(){
 	return this.mailArray;
 };
+/******************************** 
+///////////OnlyMonInfo///////////
+********************************/
+function OnlyMonInfo(m){
+	this.month = m;
+	this.id;
+	this.mailArray = [] ;
+}
+OnlyMonInfo.prototype.setmonth = function (i){
+	this.month = i ;
+}
+OnlyMonInfo.prototype.setid = function (i){
+	this.id = i ; 
+};
+OnlyMonInfo.prototype.getid = function (){
+	return this.id;
+};
+OnlyMonInfo.prototype.addmailid= function (i){
+	this.mailArray.push(i);
+};
+OnlyMonInfo.prototype.getmailid = function (){
+	return this.mailArray;
+};
 
 /******************************** 
 ///////////MailPrefs/////////////
@@ -454,17 +484,25 @@ function MailPrefs() {
 	this.dateArray = [];
 	this.addressArray = [];
 	this.addrCheckArray = [];
-	this.onlyMonthId= [0,0,0,0,0,0,0,0,0,0,0,0,0];
+	this.onlyMonthArray = [];
 }
 
 //MailPrefs's function for onlyMonth
-MailPrefs.prototype.getonlyMonthId = function ( m ) {
-	return this.onlyMonthId[m];
+MailPrefs.prototype.initMonth = function ( OnlyMonInfo ) {
+	this.onlyMonthArray.push(OnlyMonInfo);
+}
+MailPrefs.prototype.setonlyMonthFdrId = function ( m, i ) {
+	this.onlyMonthArray[m].setid(i);
 };
-MailPrefs.prototype.setonlyMonthId = function ( m,i ) {
-	this.onlyMonthId[m]=i;
+MailPrefs.prototype.getonlyMonthFdrId = function ( m ) {
+	return this.onlyMonthArray[m].getid();
 };
-
+MailPrefs.prototype.addOlyemlId = function ( m, i ) {
+	this.onlyMonthArray[m].addmailid(i);
+};
+MailPrefs.prototype.getOlyemlId = function ( m ) {
+	return this.onlyMonthArray[m].getmailid();
+};
 
 //MailPrefs's function for addressArray 
 MailPrefs.prototype.getAddress = function ( addr ) {
