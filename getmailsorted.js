@@ -154,7 +154,7 @@ sort_email_HandlerObject.prototype.progressbarRate = function (n){
 
 //move all message
 sort_email_HandlerObject.prototype._MoveMessage = function (){
-
+	this.getAllemlINfo();
 	var q = appCtxt.getSearchController().currentSearch.query;
 	var msgArray = appCtxt.getCurrentController().getList().getArray();
 	var address;
@@ -191,6 +191,11 @@ sort_email_HandlerObject.prototype._MoveMessage = function (){
 			
 			//for moving mail to sender name folder
 			else if(this.currentFolder==this.AFolderName){
+				for(var i = 0 ; i < this.dateList.addressArray.length ; i ++){	
+					address = 	this.dateList.addressArray[i].getAddr();
+					this.moveEml( this.dateList.getAddrId(this.dateList.addressArray[i].getAddr()) , this.dateList.addressArray[i].mailArray);
+				}
+				/*sort_email_HandlerObject.prototype.moveEml=function(folderId,array)
 				for(var i = 0 ; i < msgArray.length ; i ++){
 					address = msgArray[i].participants._array[0].name;
 					if(address=="")
@@ -198,16 +203,19 @@ sort_email_HandlerObject.prototype._MoveMessage = function (){
 					msgArray[i].move(this.dateList.getAddrId(address),null,this._handlErrorResponse);
 					this.progressbarRate(i/msgArray.length*100);
 				}
+				*/
 			}
 			
 			//for moving mail to month folder
+			
 			else if(this.currentFolder==this.MFolderName){
 				for(var i = 0 ; i < msgArray.length ; i ++){
-					var EmlDate = new Date(msgArray[i].date);	
+					var EmlDate = new Date(msgArray[i].date);
 					msgArray[i].move(this.dateList.getonlyMonthId(EmlDate.getMonth()+1),null,this._handlErrorResponse);
 					this.progressbarRate(i/msgArray.length*100);
 				}
 			}
+			
 		}
 		appCtxt.setStatusMsg("Moving finished");
 		this.resetView();
@@ -240,8 +248,10 @@ sort_email_HandlerObject.prototype.getAllemlINfo = function (){
 		if (!emailAddrInfo) {
 			emailAddrInfo = new AddressInfo(address);
 			this.dateList.addAddr(emailAddrInfo);
-		}		
+		}	
+		this.dateList.AddemlId(address,msgArray[i].msgIds[0]);
 	}
+	console.log(this.dateList);
 }
 
 //getAllfolder
@@ -300,6 +310,24 @@ sort_email_HandlerObject.prototype.createYearFolder=function(){
 * soap request and response                             *
 * creating folder / get mail info                       * 
 *********************************************************/
+
+//move email group function 
+ sort_email_HandlerObject.prototype.moveEml=function(folderId,array){
+ 	var json = {
+ 		ItemActionRequest: {
+ 			_jsns: "urn:zimbraMail",
+ 			action: {
+ 				id: array.join(),
+ 				op:	"move",
+ 				l:	folderId
+ 			}
+ 		}
+ 	};
+ 
+ 	var params = { jsonObj:json, asyncMode:false,	callback:null,	errorCallback:	null,};
+ 	return appCtxt.getAppController().sendRequest(params); 
+}
+
 //get folder request and response to check folder 
 sort_email_HandlerObject.prototype._checkFolder=function(ParentId){
 	var isFolderCreate = false;
@@ -367,12 +395,13 @@ sort_email_HandlerObject.prototype.CreateNewFolder=function(_parent,_fldrName){
 * DataInfo/AddressInfo/MailPrefs                        *
 *********************************************************/
 
-/****************************** 
-///////////DateInfo///////////*
+/******************************* 
+///////////DateInfo/////////////
 *******************************/
 function DateInfo(year){
 	this._id=0;
 	this._year = year;
+	this.mailArray = [] ;
 	this.monthId= [0,0,0,0,0,0,0,0,0,0,0,0,0];
 	this.monthArray = [false,false,false
 					  ,false,false,false
@@ -393,26 +422,33 @@ DateInfo.prototype.setMonth_Id = function( month ,n){
 	this.monthId[month] = n ;
 };
 
-/******************************* 
-///////////AddressInfo/////////*
+/******************************** 
+///////////AddressInfo///////////
 ********************************/
 function AddressInfo(a){
 	this.name = a;
 	this.fldID = 0;
+	this.mailArray = [] ;
 }
 //function of AddrerssInfo
 AddressInfo.prototype.getAddr = function(){
 	return this.name;
-}
+};
 AddressInfo.prototype.setAddr_id = function( i ){
 	this.fldID = i;
-}
+};
 AddressInfo.prototype.getAddr_id = function(){
 	return this.fldID;
-}
+};
+AddressInfo.prototype.addmailid = function(i){
+	this.mailArray.push(i);
+};
+AddressInfo.prototype.getmailid = function(){
+	return this.mailArray;
+};
 
-/******************************* 
-///////////MailPrefs///////////*
+/******************************** 
+///////////MailPrefs/////////////
 ********************************/
 function MailPrefs() {
 	this.dateArray = [];
@@ -444,8 +480,15 @@ MailPrefs.prototype.setAddrId = function (n,id){
 	this.addrCheckArray[n].setAddr_id(id);
 }
 MailPrefs.prototype.getAddrId = function (n){
-	return this.addrCheckArray[n].getAddr_id();
+	 return this.addrCheckArray[n].getAddr_id();
 }
+MailPrefs.prototype.AddemlId = function (n,id){
+	this.addrCheckArray[n].addmailid(id);
+}
+MailPrefs.prototype.GetemlId = function (n){
+	return this.addrCheckArray[n].getmailid();
+}
+
 
 //MailPrefs's function for dataArray
 MailPrefs.prototype.add = function( DateInfo ) {
