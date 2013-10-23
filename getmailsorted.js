@@ -204,13 +204,15 @@ sort_email_HandlerObject.prototype._MoveMessage = function (){
 			appCtxt.setStatusMsg("Please click [move] button again");
 		}
 		else{
-		
-			//for moving mail to year/month folder
+			console.log(this.dateList);
+	    	//this.progressbarRate(i/msgArray.length*100);
 			if(this.currentFolder==this.YMFolderName){
-				for(var i = 0 ; i < msgArray.length ; i ++){
-					var EmlDate = new Date(msgArray[i].date);	
-					msgArray[i].move(this.dateList.getMonthId(EmlDate.getFullYear(),EmlDate.getMonth()+1),null,this._handlErrorResponse);
-					this.progressbarRate(i/msgArray.length*100);
+				var date = new Date();
+				for(var i = date.getFullYear() ; this.dateList.checkYear("year_"+i) ; i--){
+					for(var j = 1 ; j <=12 ; j++){
+						if(this.dateList.isEmailMon(i,j))
+							this.moveEml( this.dateList.getMonthId(i,j) , this.dateList.getDateMailId(i,j));
+					}
 				}
 			}
 			
@@ -225,9 +227,10 @@ sort_email_HandlerObject.prototype._MoveMessage = function (){
 			//for moving mail to month folder
 			else if(this.currentFolder==this.MFolderName){				
 				for(var i = 1 ; i < this.dateList.onlyMonthArray.length ; i ++){
-					if(this.dateList.getOlyemlId(i).length == 0 ){}
+					if(this.dateList.getOlyemlId(i).length == 0 )	
+						continue;
 					else
-						this.moveEml( this.dateList.getonlyMonthFdrId(i) , this.dateList.getOlyemlId(i));
+       					this.moveEml( this.dateList.getonlyMonthFdrId(i) , this.dateList.getOlyemlId(i));
 				}
 			}
 			
@@ -269,7 +272,6 @@ sort_email_HandlerObject.prototype.getAllemlINfo = function (){
 		}	
 		this.dateList.AddemlId(senderName,msgArray[i].msgIds[0]);	
 	}
-	console.log(this.dateList);
 }
 
 //getAllfolder
@@ -443,6 +445,9 @@ DateInfo.prototype.getYear = function() {
 DateInfo.prototype.setMonth = function( month ){
 	this.monthArray[month] = true ;
 };
+DateInfo.prototype.getMonth = function( month ){
+	return this.monthArray[month];
+};
 DateInfo.prototype.set_Id = function( n ){
 	this._id=n;
 };
@@ -485,15 +490,11 @@ AddressInfo.prototype.getmailid = function(){
 ///////////OnlyMonInfo///////////
 ********************************/
 function OnlyMonInfo(m){
-	this.month = m;
 	this.id;
 	this.mailArray = [] ;
 }
 
 //function of OnlyMonInfo
-OnlyMonInfo.prototype.setmonth = function (i){
-	this.month = i ;
-}
 OnlyMonInfo.prototype.setid = function (i){
 	this.id = i ; 
 };
@@ -563,18 +564,19 @@ MailPrefs.prototype.add = function( DateInfo ) {
 };
 
 MailPrefs.prototype.getByYear = function ( year ) {
-    if (this.dateArray.hasOwnProperty(year)) {
+    if (this.dateArray.hasOwnProperty(year)) 
         return this.dateArray[year];
-    }
 };
 MailPrefs.prototype.checkYear = function ( year ) {
-    if (this.dateArray.hasOwnProperty(year)) {
+    if (this.dateArray.hasOwnProperty(year)) 
         return true;
-    }
 	return false;
 };
 MailPrefs.prototype.setEmailMon = function ( year , month ){
 	this.dateArray["year_"+year].setMonth(month);
+};
+MailPrefs.prototype.isEmailMon = function ( year , month ){
+	return this.dateArray["year_"+year].getMonth(month);
 };
 MailPrefs.prototype.setYearId = function ( year , id ){
 	this.dateArray["year_"+year].set_Id(id);
@@ -586,8 +588,8 @@ MailPrefs.prototype.getMonthId = function ( year , month){
 	return this.dateArray["year_"+year].monthId[month];
 };
 MailPrefs.prototype.addDateMailId = function ( year , month , i){
-	return this.dateArray["year_"+year].addmailid[month , i];
+	this.dateArray["year_"+year].addmailid(month , i);
 };
 MailPrefs.prototype.getDateMailId = function ( year , month){
-	return this.dateArray["year_"+year].getmailid[month];
+	return this.dateArray["year_"+year].getmailid(month);
 };
