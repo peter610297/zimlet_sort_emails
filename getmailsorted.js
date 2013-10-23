@@ -22,7 +22,7 @@ function() {
 	this.MainFolderId;
 	this.currentFolder;
 	
-	//set for onlymonthArray
+	//set onlymonthArray
 	for(var i = 0 ; i<=12 ; i++){
 		var onlyInfo = new OnlyMonInfo(i);
 		this.dateList.initMonth(onlyInfo);
@@ -133,6 +133,7 @@ sort_email_HandlerObject.prototype.createBtnListener = function() {
 		noticediv.style.display="";
 	}
 };
+
 //progressbar Rate
 sort_email_HandlerObject.prototype.progressbarRate = function (n){
 	var probar = document.getElementById("probar");
@@ -201,15 +202,6 @@ sort_email_HandlerObject.prototype._MoveMessage = function (){
 					address = 	this.dateList.addressArray[i].getAddr();
 					this.moveEml( this.dateList.getAddrId(this.dateList.addressArray[i].getAddr()) , this.dateList.addressArray[i].mailArray);
 				}
-				/*sort_email_HandlerObject.prototype.moveEml=function(folderId,array)
-				for(var i = 0 ; i < msgArray.length ; i ++){
-					address = msgArray[i].participants._array[0].name;
-					if(address=="")
-						address="admin";
-					msgArray[i].move(this.dateList.getAddrId(address),null,this._handlErrorResponse);
-					this.progressbarRate(i/msgArray.length*100);
-				}
-				*/
 			}
 			
 			//for moving mail to month folder
@@ -258,18 +250,19 @@ sort_email_HandlerObject.prototype.getAllemlINfo = function (){
 		}	
 		this.dateList.AddemlId(senderName,msgArray[i].msgIds[0]);	
 	}
-
+	console.log(this.dateList);
 }
 
 //getAllfolder
 sort_email_HandlerObject.prototype.getAllFolderId=function(currentfdr){
 	this._getAllFolderId(currentfdr);
-	//console.log(this.dateList);
 }
+
 /********************************************************
 * function for creating folder                          *
 * [month]/[year/month]/[address name]                   *
 *********************************************************/
+
 //create folder(address)
 sort_email_HandlerObject.prototype.createAddrFolder = function(){
 	this.MainFolderId=this.CreateNewFolder(appCtxt.getFolderTree().root.id,this.AFolderName);
@@ -278,6 +271,7 @@ sort_email_HandlerObject.prototype.createAddrFolder = function(){
 		this.CreateNewFolder(this.MainFolderId,addr[i].name);
 	}
 }
+
 //create folder(month)
 sort_email_HandlerObject.prototype.createMonthFolder=function(){
 	this.MainFolderId=this.CreateNewFolder(appCtxt.getFolderTree().root.id,this.MFolderName);
@@ -295,6 +289,7 @@ sort_email_HandlerObject.prototype.createMonthFolder=function(){
 	this.CreateNewFolder(this.MainFolderId,"month_12");
 	
 }
+
 //create folder(year/month)
 sort_email_HandlerObject.prototype.createYearFolder=function(){
 	this.MainFolderId=this.CreateNewFolder(appCtxt.getFolderTree().root.id,this.YMFolderName);
@@ -315,7 +310,7 @@ sort_email_HandlerObject.prototype.createYearFolder=function(){
 
 /********************************************************
 * soap request and response                             *
-* creating folder / get mail info                       * 
+* move mail / creating folder / get mail info           * 
 *********************************************************/
 
 //move email group function 
@@ -354,6 +349,7 @@ sort_email_HandlerObject.prototype._checkFolder=function(ParentId){
 	}
 	return null;
 }
+
 //get folder request and response to get all folder ID
 sort_email_HandlerObject.prototype._getAllFolderId=function(Fldrname){
 	var flrTree=appCtxt.getFolderTree().root.children._array;
@@ -402,19 +398,24 @@ sort_email_HandlerObject.prototype.CreateNewFolder=function(_parent,_fldrName){
 * DataInfo/AddressInfo/OnlymonInfo/MailPrefs            *
 *********************************************************/
 
-/******************************* 
-///////////DateInfo/////////////
-*******************************/
+/******************************** 
+///////////DateInfo//////////////
+********************************/
 function DateInfo(year){
 	this._id=0;
 	this._year = year;
-	this.mailArray = [] ;
 	this.monthId= [0,0,0,0,0,0,0,0,0,0,0,0,0];
 	this.monthArray = [false,false,false
 					  ,false,false,false
 					  ,false,false,false
 					  ,false,false,false,false];			  
+	//initail Mail Array 
+	this.mailArray = new Array(13);
+	for(var i = 0 ; i <= 12 ; i++)
+		this.mailArray[i] = new Array();
+	
 }
+
 //function of DataInfo 
 DateInfo.prototype.getYear = function() {
 	return this._year;
@@ -437,6 +438,7 @@ function AddressInfo(a){
 	this.fldID = 0;
 	this.mailArray = [] ;
 }
+
 //function of AddrerssInfo
 AddressInfo.prototype.getAddr = function(){
 	return this.name;
@@ -461,6 +463,8 @@ function OnlyMonInfo(m){
 	this.id;
 	this.mailArray = [] ;
 }
+
+//function of OnlyMonInfo
 OnlyMonInfo.prototype.setmonth = function (i){
 	this.month = i ;
 }
@@ -506,9 +510,8 @@ MailPrefs.prototype.getOlyemlId = function ( m ) {
 
 //MailPrefs's function for addressArray 
 MailPrefs.prototype.getAddress = function ( addr ) {
-    if (this.addrCheckArray.hasOwnProperty(addr)) {
+    if (this.addrCheckArray.hasOwnProperty(addr)) 
         return this.addrCheckArray[addr];
-    }
 };
 MailPrefs.prototype.addAddr = function ( AddressInfo ) {
 	this.addrCheckArray[AddressInfo.getAddr()] = AddressInfo;
@@ -528,7 +531,7 @@ MailPrefs.prototype.GetemlId = function (n){
 }
 
 
-//MailPrefs's function for dataArray
+//MailPrefs's function for dataArray & dateCheckArray
 MailPrefs.prototype.add = function( DateInfo ) {
 	this.dateArray["year_"+DateInfo.getYear()] = DateInfo;
 };
