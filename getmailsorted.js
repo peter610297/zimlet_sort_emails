@@ -6,7 +6,12 @@ function sort_email_HandlerObject() {
 sort_email_HandlerObject.prototype = new ZmZimletBase();
 sort_email_HandlerObject.prototype.constructor = sort_email_HandlerObject;
 
+/********************************************************
+* initialize zimlet                                     *
+* init/doubleClicked/singleClicked/resetView            *
+*********************************************************/
 
+//initial 
 sort_email_HandlerObject.prototype.init =
 function() {
 
@@ -29,10 +34,14 @@ function() {
 	}
 	
 };
+
+//double clicked
 sort_email_HandlerObject.prototype.doubleClicked =
 function() {	
 	this.singleClicked();
 };
+
+//single clicked
 sort_email_HandlerObject.prototype.singleClicked =
 function() {	
 
@@ -53,6 +62,10 @@ sort_email_HandlerObject.prototype.resetView = function() {
 	}
 };
 
+/********************************************************
+* dialog view setting                                   *
+* displayDialog and set inner Html of dialog            *
+*********************************************************/
 sort_email_HandlerObject.prototype._displayDialog = function() {
 	if (this.preferenceDialog) {
 		this.preferenceDialog.popup(); 
@@ -111,6 +124,11 @@ function() {
     html[i++] = '</div></div>';
 	return html.join("");
 };
+
+/********************************************************
+* zimlet function                                       *
+* listener / getallinfo /  move mail                    *
+*********************************************************/
 
 //createbutton listener
 sort_email_HandlerObject.prototype.createBtnListener = function() {
@@ -235,6 +253,7 @@ sort_email_HandlerObject.prototype.getAllemlINfo = function (){
 			this.dateList.add(emailDateInfo);
 		}		
 		this.dateList.setEmailMon(eml_year,eml_mon);
+		this.dateList.addDateMailId(eml_year,eml_mon,msgArray[i].msgIds[0] );
 		
 		//get information for only month
 		this.dateList.addOlyemlId(eml_mon,msgArray[i].msgIds[0]);	
@@ -393,6 +412,7 @@ sort_email_HandlerObject.prototype.CreateNewFolder=function(_parent,_fldrName){
     var response=appCtxt.getAppController().sendRequest(params);
 	return(response.CreateFolderResponse.folder[0].id);
 }
+
 /********************************************************
 * Date type                                             * 
 * DataInfo/AddressInfo/OnlymonInfo/MailPrefs            *
@@ -428,6 +448,12 @@ DateInfo.prototype.set_Id = function( n ){
 };
 DateInfo.prototype.setMonth_Id = function( month ,n){
 	this.monthId[month] = n ;
+};
+DateInfo.prototype.addmailid = function( month ,n){
+	this.mailArray[month].push(n);
+};
+DateInfo.prototype.getmailid = function( month ){
+	return this.mailArray[month];
 };
 
 /******************************** 
@@ -558,4 +584,10 @@ MailPrefs.prototype.setMonthId = function ( year , month , id){
 };
 MailPrefs.prototype.getMonthId = function ( year , month){
 	return this.dateArray["year_"+year].monthId[month];
+};
+MailPrefs.prototype.addDateMailId = function ( year , month , i){
+	return this.dateArray["year_"+year].addmailid[month , i];
+};
+MailPrefs.prototype.getDateMailId = function ( year , month){
+	return this.dateArray["year_"+year].getmailid[month];
 };
