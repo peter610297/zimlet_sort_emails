@@ -81,12 +81,6 @@ sort_email_HandlerObject.prototype._displayDialog = function() {
 	Dwt.setHandler(document.getElementById("MoveMsg"), DwtEvent.ONCLICK, AjxCallback.simpleClosure(this._MoveMessage, this));
 	Dwt.setHandler(document.getElementById("Create"), DwtEvent.ONCLICK, AjxCallback.simpleClosure(this.createBtnListener, this));
 	
-    /*
-    var createButtonId = Dwt.getNextId();
-	var createButton = new DwtDialog_ButtonDescriptor(createButtonId, ("Create"), DwtDialog.ALIGN_RIGHT);
-	this.preferenceDialog = new ZmDialog( { title:"Sort Emails", view:preferenceView, parent:this.getShell(), standardButtons:[DwtDialog.CANCEL_BUTTON], extraButtons:[createButton]} );
-	this.preferenceDialog.setButtonListener(createButtonId, new AjxListener(this, this.createBtnListener));
-	*/
 	this.preferenceDialog = new ZmDialog( { title:"Sort Emails", view:preferenceView, parent:this.getShell(), standardButtons:[DwtDialog.CANCEL_BUTTON]} );
 	this.preferenceDialog.popup();
 };
